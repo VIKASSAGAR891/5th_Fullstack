@@ -1,54 +1,60 @@
-import { useContext, useMemo } from 'react'
-import { AppContext } from '../context/AppContext'
-import Navbar from '../components/Navbar'
-import Footer from '../components/Footer'
-import { Container, Button, ListGroup } from 'react-bootstrap'
+import { useSelector, useDispatch } from "react-redux";
+import { removeItem, clearCart } from "../redux/slices/cartSlice";
+import { useMemo } from "react";
+
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 function Cart() {
-  const { state, dispatch } = useContext(AppContext)
+  const items = useSelector((state) => state.cart.items);
+  const dispatch = useDispatch();
 
   const totalPrice = useMemo(() => {
-    return state.cart.reduce((total, item) => total + item.price, 0)
-  }, [state.cart])
+    return items.reduce((total, item) => total + item.price, 0);
+  }, [items]);
 
   return (
     <>
       <Navbar />
 
-      <Container className="my-5">
+      <div className="container mt-5">
         <h2>Cart</h2>
 
-        <ListGroup className="mb-3">
-          {state.cart.map((item, index) => (
-            <ListGroup.Item key={index}>
-              {item.title} - ${item.price}
-              <Button
-                variant="danger"
-                size="sm"
-                className="float-end"
-                onClick={() =>
-                  dispatch({ type: 'REMOVE_FROM_CART', payload: index })
-                }
+        {items.length === 0 ? (
+          <p>Your cart is empty</p>
+        ) : (
+          items.map((item, index) => (
+            <div
+              key={index}
+              className="d-flex justify-content-between align-items-center mb-2"
+            >
+              <span>
+                {item.title} - ${item.price}
+              </span>
+
+              <button
+                className="btn btn-danger btn-sm"
+                onClick={() => dispatch(removeItem(index))}
               >
                 Remove
-              </Button>
-            </ListGroup.Item>
-          ))}
-        </ListGroup>
+              </button>
+            </div>
+          ))
+        )}
 
-        <h4>Total: ${totalPrice}</h4>
+        <h4 className="mt-4">Total: ${totalPrice}</h4>
 
-        <Button
-          variant="warning"
-          onClick={() => dispatch({ type: 'CLEAR_CART' })}
+        <button
+          className="btn btn-warning mt-2"
+          onClick={() => dispatch(clearCart())}
         >
           Clear Cart
-        </Button>
-      </Container>
+        </button>
+      </div>
 
       <Footer />
     </>
-  )
+  );
 }
 
-export default Cart
+export default Cart;
